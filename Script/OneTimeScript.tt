@@ -1,0 +1,35 @@
+<#@ Assembly Name="System.Core.dll" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="EnvDTE" #>
+<#@ template language="C#" debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ Assembly Name="Microsoft.VisualStudio.Shell.12.0" #>
+<#@ Assembly Name="Microsoft.VisualStudio.OLE.Interop" #>
+<#@ Assembly name="EnvDTE" #> 
+<#@ parameter name="codeClass" type="EnvDTE.CodeClass" #>
+<#@ parameter name="codeClasses" type="System.Collections.Generic.List<EnvDTE.CodeClass>" #>
+<#@ parameter name="codeInterface" type="EnvDTE.CodeInterface" #>
+<#@ parameter name="codeInterfaces" type="System.Collections.Generic.List<EnvDTE.CodeInterface>" #>
+<#@ parameter name="codeEnum" type="EnvDTE.CodeEnum" #>
+<#@ parameter name="codeEnums" type="System.Collections.Generic.List<EnvDTE.CodeEnum>" #>
+<#@ parameter name="codeStruct" type="EnvDTE.CodeStruct" #>
+<#@ parameter name="codeStructs" type="System.Collections.Generic.List<EnvDTE.CodeStruct>" #>
+<#
+if (codeClass != null)
+{  
+	   Debug.Print(codeClass.Name);
+}
+
+foreach(var inter in codeInterfaces)
+{
+#>
+	 public class <#= inter #>
+<#
+}
+#>
+
+ 

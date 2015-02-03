@@ -1,0 +1,96 @@
+<#@ Assembly Name="System.Core.dll" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="EnvDTE" #>
+<#@ template language="C#" debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ Assembly Name="Microsoft.VisualStudio.Shell.12.0" #>
+<#@ Assembly Name="Microsoft.VisualStudio.OLE.Interop" #>
+<#@ Assembly name="EnvDTE" #> 
+<#@ parameter name="codeClass" type="EnvDTE.CodeClass" #>
+<#
+if (codeClass != null)
+{  
+	   Debug.Print(codeClass.Name);
+#>
+using System;
+using System.ComponentModel;
+using System.Diagnostics.Contracts;
+using GalaSoft.MvvmLight;
+using <#= codeClass.Namespace.FullName #>;
+ 
+namespace MyNewNameSpace
+{
+		/// <summary>
+		/// Основа <seeref><#= codeClass.Name #></seeref>
+		/// </summary>
+	   public class <#= codeClass.Name #>Model : ObservableObject
+	   {
+	  
+			 private readonly <#= codeClass.Name #> _entity;
+			 public <#= codeClass.Name #>Model (<#= codeClass.Name #> entity)
+			 {
+					Contract.Assert( entity != null);
+					_entity = entity;
+			 }
+			 
+<#          
+		if(codeClass.Members != null )
+			foreach (var x in codeClass.Members)
+			{
+				var p = x as CodeProperty;
+				if (p != null && p.Access == vsCMAccess.vsCMAccessPublic)
+				{				
+					string propertyType = GetSimplifiedType(p);
+#>
+
+			 public <#= propertyType #> <#= p.Name #>
+			 {
+					get	{ return _entity.<#= p.Name #>;	}
+					<#
+				    if (p.Setter!=null && p.Setter.Access == vsCMAccess.vsCMAccessPublic)
+				    {
+				        #>
+					set
+					{
+						if(_entity.<#= p.Name #> != value)						   
+							{
+							   _entity.<#= p.Name #> = value;
+							   RaisePropertyChanged(() => <#= p.Name #>);
+							}
+					}
+					<#
+				    }
+					#>
+			 }                               
+<#
+				}
+			}
+	  
+	  
+	  
+	  
+#>
+	   }
+}
+<#
+}
+#>
+
+<#+
+	private string GetSimplifiedType(CodeProperty p)
+	{
+		var compositeName = p.Type.AsString.Split('.');
+		string propertyType = compositeName[compositeName.Length - 1];
+		if (p.Type.AsString.Contains("<"))
+		{
+			var compositeType = p.Type.AsString.Split('<');
+			var genericFullType = compositeType[0];
+			var genericTypeName = genericFullType.Split('.');
+			propertyType = genericTypeName[genericTypeName.Length - 1] + '<' + propertyType;
+		}
+		return propertyType;
+	}
+#>
